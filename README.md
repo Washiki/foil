@@ -1,10 +1,12 @@
 # Foil : a simple bash file manager
 
 A simple file manager for creating and deleting files.
-
 Written in `bash`. 
 Emulates the simpler aspects of `oil.lua`.
 
+
+
+[![Made with Bash](https://img.shields.io/badge/Made%20with-Bash-blue.svg)]()
 ## Prerequisites
 - Needs a `bash` or `posix` compliant terminal 
 
