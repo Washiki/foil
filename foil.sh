@@ -4,13 +4,24 @@
 #temp dir
 
 dotf=0;
-
+filef=0;
 #flags! here we go!
 while getopts "fdh" flag; do
 	case $flag in 
+		f)
+			filef=1;;
 		d)
-		dotf=1;
-		;;
+			dotf=1;;
+		h)
+			echo "FOIL : oil wannabe, but in bash"
+			echo "written by Utkarsh out of spite"
+			echo 
+			echo "Usage:"
+			echo "foil       Opens the filesystem. By default, ignores subfolders and dotfiles"
+			echo "foil -d    Show dotfiles"
+			echo "foil -f    Show subfolders"
+			exit ;; 
+
 	esac
 done
 
@@ -35,7 +46,7 @@ cd "$cur" || exit
 #=o acts as an OR operator, allows us to link commands basically 
 # file descriptor 2 is the stderr line, redirected to dev/null blackghole
 #
-if [[ $dotf == 0  ]]; then 
+if [[ $dotf == 0  ]] && [[ $filef == 1 ]]; then 
 	 
 	# \ allows us to have multi line commands. 
 	# However, absolutely makesure to remove all spaces.
@@ -44,10 +55,24 @@ if [[ $dotf == 0  ]]; then
 	find . -path "./$(basename "$tdir")" -prune \
 		-o -wholename "./.*" -prune \
 		-o -type f -printf "%P\n" 2>/dev/null > "$tdir/filebef.txt"
-else
+
+elif [[ $dotf == 1 ]] && [[ $filef == 1 ]];then
 	find . -path "./$(basename "$tdir")" -prune \
 		-o -type f -printf "%P\n" >"$tdir/filebef.txt" 2>/dev/null
-fi 
+
+elif [[ $dotf == 0 ]] && [[ $filef == 0 ]]; then 
+
+	find . -maxdepth 1 -path "./$(basename "$tdir")" -prune \
+		-o -wholename "./.*" -prune \
+		-o -type f -printf "%P\n" 2>/dev/null > "$tdir/filebef.txt"
+
+elif [[ $dotf == 1 ]] && [[ $filef == 0 ]]; then
+	
+	find . -maxdepth 1 -path "./$(basename "$tdir")" -prune \
+		-o -type f -printf "%P\n" >"$tdir/filebef.txt" 2>/dev/null
+
+fi
+#listen man. inline ifs break so much shit. i'll do them later. this works. don't judge me. 
 cp "$tdir"/filebef.txt "$tdir"/fileaft.txt
 
 ${EDITOR:-vim} "$tdir"/fileaft.txt

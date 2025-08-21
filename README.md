@@ -38,6 +38,14 @@ For ***deleting a file***, simply delete the line it is on.
 
 ONLY ONE FILE PER LINE IS SUPPORTED. 
 
+By default `foil` will only open the files in the directory : no dotfiles, no subfolders. 
+
+For subfolders, `foil -f`
+
+For dotfiles, `foil -d`
+
+ofcourse, `foil -df` returns both. 
+
 ## Example 
 Let the initial directory `dir` be as follows: 
 
@@ -75,5 +83,5 @@ View in the Editor:
 
 ```
 fileb.txt
-xyz/filex.txt
+mastikhor/filex.txt
 ```
