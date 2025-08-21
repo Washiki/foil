@@ -1,27 +1,53 @@
-#!/bin/bash
+#! /bin/bash 
 
 #oil, but bash. 
 #temp dir
-#
 
-tdir=$(mktemp -d -t foil_XXXXXX) #tempdir maker is pretty goated, makes a nice new dir without collisions. -d is for directory creation, -t is to allow the template. X's are for random numbers. 
+dotf=0;
+
+#flags! here we go!
+while getopts "fdh" flag; do
+	case $flag in 
+		d)
+		dotf=1;
+		;;
+	esac
+done
+
+tdir=$(mktemp -d -t foil_XXXXXX) #tempdir maker is pretty goated, makes a nice new dir without collisions.
+#-d is for directory creation, -t is to allow the template. X's are for random numbers. 
 
 #make sure ctrl + c erases the tempdir
 trap 'rm -rf "$tdir"' EXIT 
+
 cur=$(realpath "$PWD")
 #go in the directory, make the snapshot files 
-cd "$tdir"
+#adding exit as a safeguard in case cd fails 
+cd "$tdir" || exit 
 touch filebef.txt
 touch fileaft.txt
-cd "$cur"
+cd "$cur" || exit 
 
-#find and list the toplevel files. -f is for files, -printf is a find specific. Redir to filebef. 
-find . -path "./$(basename "$tdir")" -prune -o -type f ! -name ".*" -printf "%P\n" 2>/dev/null > "$tdir"/filebef.txt
+#find and list the toplevel files. 
 
-#-o acts as an OR. 
-#file descriptor 2 is the stderr line, which is redirected to the blackhole 
-#prune the ones that are in the tdir path.
-#ignore the ones that are in the form .
+#find help:
+#-f is for files, -printf is a find specific. %P prints the name relative to the current directory , takes out redundant folders. 
+#=o acts as an OR operator, allows us to link commands basically 
+# file descriptor 2 is the stderr line, redirected to dev/null blackghole
+#
+if [[ $dotf == 0  ]]; then 
+	 
+	# \ allows us to have multi line commands. 
+	# However, absolutely makesure to remove all spaces.
+	# Generaly, the editor does highlight the backslash differently when its used to have multiline
+
+	find . -path "./$(basename "$tdir")" -prune \
+		-o -wholename "./.*" -prune \
+		-o -type f -printf "%P\n" 2>/dev/null > "$tdir/filebef.txt"
+else
+	find . -path "./$(basename "$tdir")" -prune \
+		-o -type f -printf "%P\n" >"$tdir/filebef.txt" 2>/dev/null
+fi 
 cp "$tdir"/filebef.txt "$tdir"/fileaft.txt
 
 ${EDITOR:-vim} "$tdir"/fileaft.txt
@@ -47,7 +73,7 @@ else
 		#lmao, user could just fuck the system by using abs path outside base.
 		#prevent that from happening:
 		lepath=$(realpath -m "$line") 
-		#mflag se nonexistent paths are also well treated 
+		# The m flag se nonexistent paths are also well treated 
 
 		#the user could also just manually overwrite these files, so gotta skip this too
 		if [[ "$lepath" != "$cur/"* || "$lepath" == "$tdir/"* ]]; then 
@@ -113,7 +139,7 @@ else
 						((d_count++))
 					fi 
 				done <<< "$delfiles"
-				echo " "$d_count" Files Deleted"
+				echo " $d_count Files Deleted"
 				;;
 			n|N) 
 				echo "Deletion cancelled"
@@ -129,14 +155,16 @@ fi
 if [[ -z "$deltoggle" ]];then
 echo "The following files were not modified : FILE PATH NOT IN CURRENT DIRECTORY"
 while IFS= read -r line; do 
-	lepath= $(realpath -m "$line")
-	if [[ lepath != "$cur/"* ]]; then 
+	lepath=$(realpath -m "$line")
+	#helpful tip : if you did end up not referncig the value of lepath,
+	#it would just treat it as a string. 
+	if [[ "$lepath" != "$cur/"* ]]; then 
 		echo "$line"
 	fi 
 done <<< "$newfiles"
 while IFS= read -r line; do
-	lepath= $(realpath -m "$line")
-	if [[ lepath != "$cur/"* ]]; then 
+	lepath=$(realpath -m "$line")
+	if [[ "$lepath" != "$cur/"* ]]; then 
 		echo "$line"
 	fi 
 done <<< "$delfiles"
