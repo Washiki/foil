@@ -38,6 +38,9 @@ For ***deleting a file***, simply delete the line it is on.
 
 ONLY ONE FILE PER LINE IS SUPPORTED. 
 
+
+### Flags 
+
 By default `foil` will only open the files in the directory : no dotfiles, no subfolders. 
 
 For subfolders, `foil -f`
@@ -76,7 +79,7 @@ This leads to:
 dir 
 	├── fileb.txt
 	└── mastikhor
-		└── filextxt
+		└── filex.txt
 ```
 
 View in the Editor:
